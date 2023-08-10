@@ -17,7 +17,7 @@ const calculate = (command: Command, num1: number, num2: number) => {
     case "remainder":
       return num1 % num2;
     default:
-      throw Error("unknown command");
+      throw new Error("unknown command");
   }
 };
 
