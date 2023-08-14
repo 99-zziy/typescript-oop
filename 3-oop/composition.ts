@@ -54,7 +54,7 @@
     }
   }
 
-  class CheapMilkSteamer extends CoffeeMachine {
+  class CheapMilkSteamer {
     private steamMilk() {
       console.log("steaming milk....");
     }
@@ -68,7 +68,7 @@
     }
   }
 
-  class SugarMixer extends CoffeeMachine {
+  class SugarMixer {
     private getSugar() {
       console.log("getting some sugar....");
     }
@@ -111,8 +111,8 @@
 
   const machines: CoffeeMaker[] = [
     new CoffeeMachine(16),
-    new CafeLatteMachine(16, new CheapMilkSteamer(16)),
-    new SweetCoffeeMachine(16, new SugarMixer(16)),
+    new CafeLatteMachine(16, new CheapMilkSteamer()),
+    new SweetCoffeeMachine(16, new SugarMixer()),
   ];
 
   machines.map((machine) => {
