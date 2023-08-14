@@ -9,11 +9,22 @@
     makeCoffee(shots: number): CoffeeCup;
   }
 
+  interface MilkProvider {
+    makeMilk(coffee: CoffeeCup): CoffeeCup;
+  }
+  interface SugarProvider {
+    addSugar(coffee: CoffeeCup): CoffeeCup;
+  }
+
   class CoffeeMachine implements CoffeeMaker {
     private static BEANS_GRAM_PER_SHOT: number = 7;
     private coffeeBeans: number = 0;
 
-    constructor(coffeeBeans: number) {
+    constructor(
+      coffeeBeans: number,
+      private milkSteamer: MilkProvider,
+      private sugarMixer: SugarProvider
+    ) {
       this.coffeeBeans = coffeeBeans;
     }
 
@@ -50,11 +61,13 @@
     makeCoffee(shots: number): CoffeeCup {
       this.grindBeans(shots);
       this.preHeat();
-      return this.extract(shots);
+      const coffee = this.extract(shots);
+      const sugarAdded = this.sugarMixer.addSugar(coffee);
+      return this.milkSteamer.makeMilk(sugarAdded);
     }
   }
 
-  class CheapMilkSteamer {
+  class CheapMilkSteamer implements MilkProvider {
     private steamMilk() {
       console.log("steaming milk....");
     }
@@ -68,7 +81,27 @@
     }
   }
 
-  class SugarMixer {
+  class FancyMilkSteamer implements MilkProvider {
+    private steamMilk() {
+      console.log("steaming milk....");
+    }
+
+    makeMilk(coffee: CoffeeCup): CoffeeCup {
+      this.steamMilk();
+      return {
+        ...coffee,
+        hasMilk: true,
+      };
+    }
+  }
+
+  class NoMilkSteamer implements MilkProvider {
+    makeMilk(coffee: CoffeeCup): CoffeeCup {
+      return coffee;
+    }
+  }
+
+  class SugarMixer implements SugarProvider {
     private getSugar() {
       console.log("getting some sugar....");
     }
@@ -83,40 +116,19 @@
     }
   }
 
-  class CafeLatteMachine extends CoffeeMachine {
-    constructor(beans: number, private milkSteamer: CheapMilkSteamer) {
-      super(beans);
-    }
-
-    private steamMilk() {
-      console.log("steaming milk....");
-    }
-
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
-      return this.milkSteamer.makeMilk(coffee);
+  class NoSugarMixer implements SugarProvider {
+    addSugar(coffee: CoffeeCup): CoffeeCup {
+      return coffee;
     }
   }
 
-  class SweetCoffeeMachine extends CoffeeMachine {
-    constructor(beans: number, private sugar: SugarMixer) {
-      super(beans);
-    }
+  const cheapMilkSteamer = new CheapMilkSteamer();
+  const fancyMilkSteamer = new FancyMilkSteamer();
+  const noMilkSteamer = new NoMilkSteamer();
 
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
-      return this.sugar.addSugar(coffee);
-    }
-  }
+  const sugarMixer = new SugarMixer();
+  const noSugarMixer = new NoSugarMixer();
 
-  const machines: CoffeeMaker[] = [
-    new CoffeeMachine(16),
-    new CafeLatteMachine(16, new CheapMilkSteamer()),
-    new SweetCoffeeMachine(16, new SugarMixer()),
-  ];
-
-  machines.map((machine) => {
-    machine.makeCoffee(1);
-    console.log("");
-  });
+  const cheapCafeLatte = new CoffeeMachine(12, cheapMilkSteamer, sugarMixer);
+  const fancyCafeLatte = new CoffeeMachine(12, fancyMilkSteamer, noSugarMixer);
 }
